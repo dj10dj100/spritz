@@ -13,22 +13,7 @@ import {
 } from "@/lib/participant";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { spritzWindowStatus } from "@/lib/time";
-
-const EMOJI_PALETTE = ["🍹", "🍸", "🥂", "🍷", "🍺", "🌶️", "🍋", "🍊", "🍑", "🐝", "🦄", "🐙"];
-const COLOR_PALETTE = [
-  "#FF6B1A", "#E04E00", "#1F4A2E", "#9CC9D8", "#D69500",
-  "#C13A2E", "#5A9BAE", "#6E5F50", "#3E7C47", "#A45EE5",
-];
-
-function safeEmoji(input: string | undefined): string {
-  if (!input) return "🍹";
-  return EMOJI_PALETTE.includes(input) ? input : "🍹";
-}
-
-function safeColor(input: string | undefined): string {
-  if (!input) return "#FF6B1A";
-  return COLOR_PALETTE.includes(input) ? input : "#FF6B1A";
-}
+import { DEFAULT_COLOR, DEFAULT_EMOJI, safeColor, safeEmoji } from "@/lib/palettes";
 
 export async function logSpritz(): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const me = await getCurrentParticipant();
@@ -129,10 +114,12 @@ export async function registerParticipant(formData: FormData) {
     redirect(`/register?token=${existing.token}&returning=1`);
   }
 
+  const emoji = safeEmoji(String(formData.get("emoji") ?? "")) || DEFAULT_EMOJI;
+  const color = safeColor(String(formData.get("color") ?? "")) || DEFAULT_COLOR;
   const token = generateToken();
   const { error } = await supabase
     .from("participants")
-    .insert({ token, display_name: displayName, email, emoji: "🍹", color: "#FF6B1A" });
+    .insert({ token, display_name: displayName, email, emoji, color });
 
   if (error) redirect(`/register?error=${encodeURIComponent(error.message)}`);
 
