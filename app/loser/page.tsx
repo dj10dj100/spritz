@@ -35,7 +35,7 @@ export default async function LoserPage() {
           Open your personal link first.
         </p>
         <Link href="/" className="ui-label text-[11px] text-[var(--color-ink-muted)] underline">
-          ← Hub
+          ← Leaderboard
         </Link>
       </main>
     );
@@ -81,7 +81,7 @@ export default async function LoserPage() {
         href="/"
         className="ui-label inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-aperol)] px-6 text-[15px] font-semibold text-[var(--color-cream)] shadow-sm transition active:scale-[0.97]"
       >
-        Back to the hub
+        Back to the leaderboard
       </Link>
     </main>
   );

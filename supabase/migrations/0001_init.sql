@@ -1,9 +1,19 @@
 -- spritzulator v1 — initial schema (token-per-person, no Supabase Auth).
+--
+-- ⚠ DESTRUCTIVE: drops any existing spritzulator tables before recreating.
+-- Safe to re-run; nukes participants + spritzes data each time.
 
 create extension if not exists pgcrypto;
 
--- 1) Participants. One row per friend; identified by a shared-secret token in their URL.
-create table if not exists participants (
+-- ─── 0) Reset ────────────────────────────────────────────────────────────
+-- Drop in FK-dependency order. CASCADE clears indexes, policies, triggers,
+-- and any leftover publication membership tied to the table.
+drop table if exists spritzes     cascade;
+drop table if exists participants cascade;
+
+-- ─── 1) Participants ────────────────────────────────────────────────────
+-- One row per friend; identified by a shared-secret token in their URL.
+create table participants (
   id uuid primary key default gen_random_uuid(),
   token text not null unique,
   display_name text not null,
@@ -12,8 +22,9 @@ create table if not exists participants (
   joined_at timestamptz not null default now()
 );
 
--- 2) Spritzes (one row per tap, soft-deletable for 10s undo).
-create table if not exists spritzes (
+-- ─── 2) Spritzes ────────────────────────────────────────────────────────
+-- One row per tap; soft-deletable for 10s undo.
+create table spritzes (
   id uuid primary key default gen_random_uuid(),
   participant_id uuid not null references participants(id) on delete cascade,
   consumed_at timestamptz not null default now(),
@@ -22,29 +33,28 @@ create table if not exists spritzes (
   deleted_at timestamptz
 );
 
-create index if not exists idx_spritzes_participant_consumed
+create index idx_spritzes_participant_consumed
   on spritzes(participant_id, consumed_at desc);
 
-create index if not exists idx_spritzes_consumed_active
+create index idx_spritzes_consumed_active
   on spritzes(consumed_at desc) where deleted_at is null;
 
--- 3) RLS — anon can READ everything (so the leaderboard + realtime work directly
--- from the browser), but cannot mutate. All inserts/updates go through Next.js
--- Server Actions using the service-role key.
+-- ─── 3) RLS ─────────────────────────────────────────────────────────────
+-- anon + authenticated can READ everything (so the leaderboard + realtime
+-- work directly from the browser); all mutations go through Server Actions
+-- using the service-role key.
 alter table participants enable row level security;
 alter table spritzes     enable row level security;
-
-drop policy if exists "read participants" on participants;
-drop policy if exists "read spritzes"     on spritzes;
 
 create policy "read participants" on participants
   for select to anon, authenticated using (true);
 
--- Active (non-soft-deleted) spritzes are readable. Soft-deleted rows are hidden
--- so realtime UPDATE events for undo carry a "row no longer matches" signal.
 create policy "read spritzes" on spritzes
   for select to anon, authenticated using (deleted_at is null);
 
--- 4) Realtime: publish both tables so all clients get INSERT/UPDATE/DELETE events.
+-- ─── 4) Realtime ────────────────────────────────────────────────────────
+-- Publish both tables so clients get INSERT/UPDATE/DELETE events.
+-- The `drop table … cascade` above already removed any prior membership,
+-- so these adds are safe and won't conflict.
 alter publication supabase_realtime add table spritzes;
 alter publication supabase_realtime add table participants;

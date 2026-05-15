@@ -1,5 +1,13 @@
 import type { Participant, Spritz } from "./types";
 import { startOfRomeDay } from "./time";
+import { TIMEZONE } from "./trip-config";
+
+// Per-spritz physical/nutritional facts. One bar-poured Aperol spritz:
+// 60ml Aperol (11% ABV) + 90ml Prosecco (11% ABV) + ~25ml soda.
+export const ML_PER_SPRITZ = 175;
+export const KCAL_PER_SPRITZ = 125;
+// UK alcohol units = (ml × ABV%) / 1000. Aperol: 60×11=660; Prosecco: 90×11=990. Total 1650 → 1.65 units.
+export const UNITS_PER_SPRITZ = 1.65;
 
 function activeSpritzes(spritzes: Spritz[]): Spritz[] {
   return spritzes.filter((s) => !s.deleted_at);
@@ -93,4 +101,51 @@ export function loser(spritzes: Spritz[], participants: Participant[]): LoserRow
       return a.participant.display_name.localeCompare(b.participant.display_name);
     });
   return ranked[0] ?? null;
+}
+
+export type DailyCount = { key: string; label: string; count: number };
+
+/**
+ * Group active spritzes by Europe/Rome day, returning one entry per day from
+ * the earliest-spritz day through today (inclusive). Empty days included as 0.
+ */
+export function spritzesPerDay(spritzes: Spritz[], now: Date = new Date()): DailyCount[] {
+  const active = activeSpritzes(spritzes);
+  if (active.length === 0) return [];
+
+  const bucket = new Map<string, number>();
+  let earliest = Number.POSITIVE_INFINITY;
+  for (const s of active) {
+    const t = +new Date(s.consumed_at);
+    if (t < earliest) earliest = t;
+    const key = romeDayKey(new Date(s.consumed_at));
+    bucket.set(key, (bucket.get(key) ?? 0) + 1);
+  }
+
+  const startTs = +startOfRomeDay(new Date(earliest));
+  const endTs = +startOfRomeDay(now);
+  const out: DailyCount[] = [];
+  for (let t = startTs; t <= endTs; t += 24 * 60 * 60 * 1000) {
+    const d = new Date(t);
+    const key = romeDayKey(d);
+    out.push({ key, label: romeDayLabel(d), count: bucket.get(key) ?? 0 });
+  }
+  return out;
+}
+
+function romeDayKey(d: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+function romeDayLabel(d: Date): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: TIMEZONE,
+    weekday: "short",
+    day: "numeric",
+  }).format(d);
 }

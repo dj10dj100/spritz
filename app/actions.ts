@@ -123,7 +123,57 @@ export async function removeParticipant(formData: FormData) {
   if (!id) redirect("/admin");
 
   const supabase = createSupabaseAdminClient();
-  await supabase.from("participants").delete().eq("id", id);
+  const { error, count } = await supabase
+    .from("participants")
+    .delete({ count: "exact" })
+    .eq("id", id);
+
+  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (!count) redirect(`/admin?error=${encodeURIComponent("Delete affected 0 rows.")}`);
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  redirect("/admin");
+}
+
+export async function setParticipantTotal(formData: FormData) {
+  if (!(await isAdmin())) redirect("/admin");
+
+  const id = String(formData.get("id") ?? "");
+  const raw = String(formData.get("total") ?? "");
+  if (!id) redirect("/admin");
+
+  const target = Number.parseInt(raw, 10);
+  if (!Number.isFinite(target) || target < 0 || target > 9999) {
+    redirect(`/admin?error=${encodeURIComponent("Total must be 0–9999.")}`);
+  }
+
+  const supabase = createSupabaseAdminClient();
+
+  const { data: active, error: readErr } = await supabase
+    .from("spritzes")
+    .select("id, consumed_at")
+    .eq("participant_id", id)
+    .is("deleted_at", null)
+    .order("consumed_at", { ascending: false });
+
+  if (readErr) redirect(`/admin?error=${encodeURIComponent(readErr.message)}`);
+
+  const current = active?.length ?? 0;
+  const diff = target - current;
+
+  if (diff > 0) {
+    const rows = Array.from({ length: diff }, () => ({ participant_id: id }));
+    const { error } = await supabase.from("spritzes").insert(rows);
+    if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  } else if (diff < 0) {
+    const toDelete = (active ?? []).slice(0, -diff).map((r) => r.id as string);
+    const { error } = await supabase
+      .from("spritzes")
+      .update({ deleted_at: new Date().toISOString() })
+      .in("id", toDelete);
+    if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  }
 
   revalidatePath("/admin");
   revalidatePath("/");

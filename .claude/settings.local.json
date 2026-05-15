@@ -3,7 +3,14 @@
     "allow": [
       "Bash(~/.claude/skills/gstack/bin/gstack-config set *)",
       "Bash(touch ~/.claude/skills/gstack/.feature-prompted-continuous-checkpoint)",
-      "Bash(touch ~/.claude/skills/gstack/.feature-prompted-model-overlay)"
+      "Bash(touch ~/.claude/skills/gstack/.feature-prompted-model-overlay)",
+      "Bash(npx tsc *)",
+      "Bash(tail -40 /tmp/spritz-dev.log)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -s -o /tmp/spritz-home.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3001/)",
+      "Bash(awk 'NR==146 {for\\(i=1;i<=length\\($0\\);i++\\) printf\\(\"%d:%c \", i, substr\\($0,i,1\\)\\); print \"\"}' /Users/daniel.jenkins/sites/spritzulator/components/HubClient.tsx)",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(pkill -f \"next dev\")"
     ]
   }
 }

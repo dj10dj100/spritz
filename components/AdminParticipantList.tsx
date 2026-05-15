@@ -5,10 +5,17 @@ import type { Participant } from "@/lib/types";
 
 type Props = {
   participants: Participant[];
+  totals: Record<string, number>;
   onRemoveAction: (formData: FormData) => void | Promise<void>;
+  onSetTotalAction: (formData: FormData) => void | Promise<void>;
 };
 
-export default function AdminParticipantList({ participants, onRemoveAction }: Props) {
+export default function AdminParticipantList({
+  participants,
+  totals,
+  onRemoveAction,
+  onSetTotalAction,
+}: Props) {
   const [origin, setOrigin] = useState("");
   useEffect(() => {
     if (typeof window !== "undefined") setOrigin(window.location.origin);
@@ -55,10 +62,50 @@ export default function AdminParticipantList({ participants, onRemoveAction }: P
               </button>
             </form>
           </div>
+          <TotalEditor
+            participantId={p.id}
+            total={totals[p.id] ?? 0}
+            onSetTotalAction={onSetTotalAction}
+          />
           <ShareRow url={origin ? `${origin}/?u=${p.token}` : `/?u=${p.token}`} />
         </li>
       ))}
     </ul>
+  );
+}
+
+function TotalEditor({
+  participantId,
+  total,
+  onSetTotalAction,
+}: {
+  participantId: string;
+  total: number;
+  onSetTotalAction: (formData: FormData) => void | Promise<void>;
+}) {
+  return (
+    <form action={onSetTotalAction} className="flex items-center gap-2">
+      <span className="ui-label text-[10px] text-[var(--color-ink-muted)]">total</span>
+      <input type="hidden" name="id" value={participantId} />
+      <input
+        type="number"
+        name="total"
+        min={0}
+        max={9999}
+        step={1}
+        defaultValue={total}
+        className="w-20 rounded-[var(--radius-sm)] border border-[var(--color-ink-faint)] bg-[var(--color-cream)] px-2 py-2 text-center font-mono text-base text-[var(--color-ink)] focus:border-[var(--color-aperol)] focus:outline-none"
+      />
+      <button
+        type="submit"
+        className="ui-label rounded-[var(--radius-sm)] bg-[var(--color-ink)] px-3 py-2 text-[10px] font-semibold text-[var(--color-cream)] transition active:scale-95"
+      >
+        save
+      </button>
+      <span className="ui-label ml-auto text-[10px] text-[var(--color-ink-muted)]">
+        now: {total}
+      </span>
+    </form>
   );
 }
 

@@ -1,7 +1,7 @@
 // Minimal service worker: cache shell assets so the app launches offline-y.
 // Realtime + API calls are network-first and bypass the cache.
 
-const CACHE = "spritzulator-v1";
+const CACHE = "spritzulator-v2";
 const SHELL = ["/", "/manifest.webmanifest", "/grain.svg", "/icons/icon.svg"];
 
 self.addEventListener("install", (event) => {

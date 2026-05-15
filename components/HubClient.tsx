@@ -14,7 +14,7 @@ const FEED_PAGE_SIZE = 20;
 const UNDO_WINDOW_MS = 10_000;
 
 type Props = {
-  me: Participant;
+  me: Participant | null;
   initialParticipants: Participant[];
   initialSpritzes: Spritz[];
   initialFeed: Spritz[];
@@ -143,18 +143,24 @@ export default function HubClient({ me, initialParticipants, initialSpritzes, in
         </h1>
       </header>
 
-      <Leaderboard participants={participants} spritzes={spritzes} meId={me.id} />
+      <Leaderboard participants={participants} spritzes={spritzes} meId={me?.id ?? ""} />
 
-      <BigSpritzButton
-        me={me}
-        onOptimisticInsert={onOptimisticInsert}
-        onConfirmed={onInsertConfirmed}
-        onFailed={onInsertFailed}
-      />
+      {me ? (
+        <BigSpritzButton
+          me={me}
+          onOptimisticInsert={onOptimisticInsert}
+          onConfirmed={onInsertConfirmed}
+          onFailed={onInsertFailed}
+        />
+      ) : (
+        <p className="text-center text-sm italic text-[var(--color-ink-muted)]">
+          Got your personal link? Open it to spritz.
+        </p>
+      )}
 
       <LiveFeed feed={feed} participantsById={participantsById} />
 
-      {pendingUndo && (
+      {me && pendingUndo && (
         <UndoToast
           spritzId={pendingUndo.id}
           expiresAt={pendingUndo.expiresAt}

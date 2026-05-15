@@ -55,36 +55,61 @@ export default function Leaderboard({ participants, spritzes, meId }: Props) {
           const isLeader = idx === 0 && row.count > 0;
           const isMe = row.participant.id === meId;
           const rank = idx + 1;
-          const rankClass = idx < 3 ? "text-[44px]" : "text-[32px]";
+          const rankClass = isLeader
+            ? "text-[64px]"
+            : idx < 3
+            ? "text-[44px]"
+            : "text-[32px]";
+          const avatarClass = isLeader ? "h-16 w-16 text-3xl" : "h-12 w-12 text-2xl";
+          const nameClass = isLeader
+            ? "display text-[28px] font-bold text-[var(--color-ink)]"
+            : "font-sans text-[20px] font-semibold text-[var(--color-ink)]";
+          const countClass = isLeader ? "text-[56px]" : "text-[32px]";
+          const surfaceClass = isLeader
+            ? "bg-[var(--color-aperol)] px-5 py-6 shadow-[0_8px_28px_-6px_rgba(255,107,26,0.55)]"
+            : "bg-[var(--color-cream-warm)] px-4 py-4";
           return (
             <motion.div
               key={row.participant.id}
               layout
               layoutId={row.participant.id}
               transition={{ type: "spring", stiffness: 260, damping: 22 }}
-              className={`relative flex items-center gap-4 rounded-[var(--radius-lg)] bg-[var(--color-cream-warm)] px-4 py-4 ${
-                isLeader ? "outline outline-2 -outline-offset-2 outline-[var(--color-aperol)] shadow-[0_0_24px_-4px_rgba(255,107,26,0.45)]" : ""
-              }`}
+              className={`relative flex items-center gap-4 rounded-[var(--radius-lg)] ${surfaceClass}`}
               style={isMe ? { boxShadow: `inset 0 0 0 2px ${row.participant.color}` } : undefined}
             >
               {isLeader && <Crown />}
-              <div className={`display tabular w-12 text-center font-bold ${rankClass} text-[var(--color-ink)]`}>
+              <div className={`display tabular w-14 text-center font-bold ${rankClass} text-[var(--color-ink)]`}>
                 {rank}
               </div>
               <div
                 aria-hidden
-                className="flex h-12 w-12 items-center justify-center rounded-full text-2xl"
+                className={`flex items-center justify-center rounded-full ${avatarClass} ${
+                  isLeader ? "ring-2 ring-[var(--color-cream)]/80" : ""
+                }`}
                 style={{ backgroundColor: row.participant.color }}
               >
                 {row.participant.emoji}
               </div>
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate font-sans text-[20px] font-semibold text-[var(--color-ink)]">
+                <span className={`truncate ${nameClass}`}>
                   {row.participant.display_name}
-                  {isMe && <span className="ml-2 text-xs uppercase tracking-wider text-[var(--color-ink-muted)]">you</span>}
+                  {isMe && (
+                    <span className="ml-2 text-xs uppercase tracking-wider text-[var(--color-ink-muted)]">
+                      you
+                    </span>
+                  )}
                 </span>
+                {isLeader && (
+                  <span className="ui-label text-[10px] font-semibold text-[var(--color-ink)]/75">
+                    in the lead
+                  </span>
+                )}
               </div>
-              <div className="display tabular text-[32px] font-bold text-[var(--color-ink)]">{row.count}</div>
+              <div
+                className={`display tabular font-bold text-[var(--color-ink)] ${countClass}`}
+              >
+                {row.count}
+              </div>
             </motion.div>
           );
         })}

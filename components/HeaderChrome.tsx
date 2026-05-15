@@ -17,7 +17,7 @@ export default function HeaderChrome() {
           aria-current={isHub ? "page" : undefined}
           className={`ui-label text-[11px] ${isHub ? "text-[var(--color-aperol)]" : "text-[var(--color-ink-muted)]"}`}
         >
-          Hub
+          Leaderboard
         </Link>
         <Link
           href="/stats"

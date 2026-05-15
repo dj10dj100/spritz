@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { isAdmin } from "@/lib/participant";
 import { createSupabaseReadClient } from "@/lib/supabase/server";
-import { addParticipant, adminLogin, adminLogout, removeParticipant } from "@/app/actions";
+import {
+  addParticipant,
+  adminLogin,
+  adminLogout,
+  removeParticipant,
+  setParticipantTotal,
+} from "@/app/actions";
 import AdminParticipantList from "@/components/AdminParticipantList";
 import AdminAddForm from "@/components/AdminAddForm";
 import type { Participant } from "@/lib/types";
@@ -45,7 +51,7 @@ export default async function AdminPage({
           </button>
         </form>
         <Link href="/" className="ui-label text-[11px] text-[var(--color-ink-muted)] underline">
-          ← Hub
+          ← Leaderboard
         </Link>
       </main>
     );
@@ -57,6 +63,17 @@ export default async function AdminPage({
     .select("*")
     .order("joined_at", { ascending: true })
     .returns<Participant[]>();
+
+  const { data: activeSpritzes } = await supabase
+    .from("spritzes")
+    .select("participant_id")
+    .is("deleted_at", null)
+    .returns<{ participant_id: string }[]>();
+
+  const totals: Record<string, number> = {};
+  for (const row of activeSpritzes ?? []) {
+    totals[row.participant_id] = (totals[row.participant_id] ?? 0) + 1;
+  }
 
   return (
     <main className="flex flex-1 flex-col gap-8 py-6">
@@ -84,7 +101,12 @@ export default async function AdminPage({
         <h2 className="ui-label text-[11px] text-[var(--color-ink-muted)]">
           Participants ({(participants ?? []).length})
         </h2>
-        <AdminParticipantList participants={participants ?? []} onRemoveAction={removeParticipant} />
+        <AdminParticipantList
+          participants={participants ?? []}
+          totals={totals}
+          onRemoveAction={removeParticipant}
+          onSetTotalAction={setParticipantTotal}
+        />
       </section>
     </main>
   );

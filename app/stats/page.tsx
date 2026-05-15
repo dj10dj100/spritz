@@ -2,7 +2,17 @@ import Link from "next/link";
 import { createSupabaseReadClient } from "@/lib/supabase/server";
 import { getCurrentParticipant } from "@/lib/participant";
 import type { Participant, Spritz } from "@/lib/types";
-import { dryStreak, spritzOfTheDay, spritzesPerHour, totalGroup } from "@/lib/stats";
+import {
+  KCAL_PER_SPRITZ,
+  ML_PER_SPRITZ,
+  UNITS_PER_SPRITZ,
+  dryStreak,
+  spritzOfTheDay,
+  spritzesPerDay,
+  spritzesPerHour,
+  totalGroup,
+} from "@/lib/stats";
+import DailySpritzChart from "@/components/DailySpritzChart";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +25,7 @@ export default async function StatsPage() {
           Open your personal link first.
         </p>
         <Link href="/" className="ui-label text-[11px] text-[var(--color-ink-muted)] underline">
-          ← Hub
+          ← Leaderboard
         </Link>
       </main>
     );
@@ -41,6 +51,11 @@ export default async function StatsPage() {
   const total = totalGroup(ss);
   const perHour = spritzesPerHour(ss);
   const sotd = spritzOfTheDay(ss, ps);
+  const daily = spritzesPerDay(ss);
+
+  const litres = (total * ML_PER_SPRITZ) / 1000;
+  const kcal = total * KCAL_PER_SPRITZ;
+  const units = total * UNITS_PER_SPRITZ;
 
   const streaks = ps
     .map((p) => ({ participant: p, hours: dryStreak(ss, p.id) }))
@@ -52,14 +67,22 @@ export default async function StatsPage() {
       <header className="flex items-center justify-between">
         <h1 className="display text-[44px]">Stats</h1>
         <Link href="/" className="ui-label text-[11px] text-[var(--color-ink-muted)] underline">
-          ← Hub
+          ← Leaderboard
         </Link>
       </header>
 
       <div className="grid grid-cols-2 gap-3">
         <StatTile label="Group total" value={String(total)} />
         <StatTile label="Per hour" value={perHour.toFixed(1)} />
+        <StatTile label="Litres" value={litres.toFixed(2)} suffix="L" />
+        <StatTile label="Calories" value={kcal.toLocaleString()} suffix="kcal" />
+        <StatTile label="Alcohol units" value={units.toFixed(1)} />
       </div>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="ui-label text-[11px] text-[var(--color-ink-muted)]">Day by day</h2>
+        <DailySpritzChart days={daily} />
+      </section>
 
       <section className="flex flex-col gap-3 rounded-[var(--radius-lg)] bg-[var(--color-cream-warm)] p-5">
         <h2 className="ui-label text-[11px] text-[var(--color-ink-muted)]">Spritz of the day</h2>
@@ -116,11 +139,18 @@ export default async function StatsPage() {
   );
 }
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatTile({ label, value, suffix }: { label: string; value: string; suffix?: string }) {
   return (
     <div className="flex flex-col gap-1 rounded-[var(--radius-lg)] bg-[var(--color-cream-warm)] p-5">
       <span className="ui-label text-[11px] text-[var(--color-ink-muted)]">{label}</span>
-      <span className="display tabular text-[44px] font-bold text-[var(--color-aperol)]">{value}</span>
+      <span className="display tabular flex items-baseline gap-1 text-[44px] font-bold text-[var(--color-aperol)]">
+        {value}
+        {suffix && (
+          <span className="font-sans text-base font-semibold text-[var(--color-ink-muted)]">
+            {suffix}
+          </span>
+        )}
+      </span>
     </div>
   );
 }
