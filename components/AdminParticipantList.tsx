@@ -48,6 +48,11 @@ export default function AdminParticipantList({
               <span className="truncate font-sans text-base font-semibold text-[var(--color-ink)]">
                 {p.display_name}
               </span>
+              {p.email && (
+                <span className="truncate font-sans text-[12px] text-[var(--color-ink-muted)]">
+                  {p.email}
+                </span>
+              )}
               <span className="font-mono text-[11px] text-[var(--color-ink-muted)]">
                 token: {p.token}
               </span>

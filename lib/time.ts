@@ -1,4 +1,36 @@
-import { TIMEZONE } from "./trip-config";
+import { TIMEZONE, TRIP_END, TRIP_START } from "./trip-config";
+
+export type WindowStatus =
+  | { state: "before"; opensLabel: string }
+  | { state: "open"; closesLabel: string }
+  | { state: "after"; closedLabel: string };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Whether the spritz window is open in Europe/Rome time.
+ * Window is inclusive of both TRIP_START and TRIP_END (full Rome days).
+ */
+export function spritzWindowStatus(now: Date = new Date()): WindowStatus {
+  // T12:00:00Z is a safe midday-UTC anchor that resolves to the right calendar
+  // day in Rome regardless of DST.
+  const startTs = +startOfRomeDay(new Date(`${TRIP_START}T12:00:00Z`));
+  const endStartTs = +startOfRomeDay(new Date(`${TRIP_END}T12:00:00Z`));
+  const endTs = endStartTs + DAY_MS; // exclusive upper bound
+  const n = +now;
+
+  if (n < startTs) return { state: "before", opensLabel: niceDate(TRIP_START) };
+  if (n >= endTs) return { state: "after", closedLabel: niceDate(TRIP_END) };
+  return { state: "open", closesLabel: niceDate(TRIP_END) };
+}
+
+function niceDate(iso: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: TIMEZONE,
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${iso}T12:00:00Z`));
+}
 
 export function formatRome(d: Date | string, opts?: Intl.DateTimeFormatOptions): string {
   const date = typeof d === "string" ? new Date(d) : d;

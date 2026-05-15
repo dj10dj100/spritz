@@ -12,6 +12,7 @@ import {
   isAdmin,
 } from "@/lib/participant";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { spritzWindowStatus } from "@/lib/time";
 
 const EMOJI_PALETTE = ["🍹", "🍸", "🥂", "🍷", "🍺", "🌶️", "🍋", "🍊", "🍑", "🐝", "🦄", "🐙"];
 const COLOR_PALETTE = [
@@ -32,6 +33,14 @@ function safeColor(input: string | undefined): string {
 export async function logSpritz(): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const me = await getCurrentParticipant();
   if (!me) return { ok: false, error: "Not in the trip." };
+
+  const window = spritzWindowStatus();
+  if (window.state === "before") {
+    return { ok: false, error: `Spritz window opens ${window.opensLabel}.` };
+  }
+  if (window.state === "after") {
+    return { ok: false, error: `Trip's over — window closed ${window.closedLabel}.` };
+  }
 
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
@@ -93,6 +102,43 @@ export async function adminLogout() {
   const jar = await cookies();
   jar.delete(ADMIN_COOKIE);
   redirect("/admin");
+}
+
+// ─── self-registration ────────────────────────────────────────────────────
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export async function registerParticipant(formData: FormData) {
+  const displayName = String(formData.get("display_name") ?? "").trim().slice(0, 32);
+  const email = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 254);
+
+  if (!displayName) redirect("/register?error=name");
+  if (!email || !EMAIL_RE.test(email)) redirect("/register?error=email");
+
+  const supabase = createSupabaseAdminClient();
+
+  const { data: existing, error: lookupErr } = await supabase
+    .from("participants")
+    .select("token")
+    .eq("email", email)
+    .maybeSingle<{ token: string }>();
+
+  if (lookupErr) redirect(`/register?error=${encodeURIComponent(lookupErr.message)}`);
+
+  if (existing) {
+    redirect(`/register?token=${existing.token}&returning=1`);
+  }
+
+  const token = generateToken();
+  const { error } = await supabase
+    .from("participants")
+    .insert({ token, display_name: displayName, email, emoji: "🍹", color: "#FF6B1A" });
+
+  if (error) redirect(`/register?error=${encodeURIComponent(error.message)}`);
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  redirect(`/register?token=${token}`);
 }
 
 export async function addParticipant(formData: FormData) {

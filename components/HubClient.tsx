@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Participant, Spritz } from "@/lib/types";
+import type { WindowStatus } from "@/lib/time";
 import BigSpritzButton from "./BigSpritzButton";
 import Leaderboard from "./Leaderboard";
 import LiveFeed from "./LiveFeed";
@@ -17,11 +18,18 @@ type Props = {
   initialParticipants: Participant[];
   initialSpritzes: Spritz[];
   initialFeed: Spritz[];
+  windowStatus: WindowStatus;
 };
 
 type PendingUndo = { id: string; expiresAt: number };
 
-export default function HubClient({ me, initialParticipants, initialSpritzes, initialFeed }: Props) {
+export default function HubClient({
+  me,
+  initialParticipants,
+  initialSpritzes,
+  initialFeed,
+  windowStatus,
+}: Props) {
   const [participants, setParticipants] = useState<Participant[]>(initialParticipants);
   const [spritzes, setSpritzes] = useState<Spritz[]>(initialSpritzes);
   const [feed, setFeed] = useState<Spritz[]>(initialFeed);
@@ -147,7 +155,13 @@ export default function HubClient({ me, initialParticipants, initialSpritzes, in
 
       <Leaderboard participants={participants} spritzes={spritzes} meId={me?.id ?? ""} />
 
-      {me ? (
+      {windowStatus.state !== "open" ? (
+        <p className="rounded-[var(--radius-lg)] bg-[var(--color-cream-warm)] px-4 py-4 text-center text-sm italic text-[var(--color-ink-muted)]">
+          {windowStatus.state === "before"
+            ? `Spritz window opens ${windowStatus.opensLabel}.`
+            : `Trip's over — window closed ${windowStatus.closedLabel}.`}
+        </p>
+      ) : me ? (
         <BigSpritzButton
           me={me}
           onOptimisticInsert={onOptimisticInsert}
@@ -155,9 +169,17 @@ export default function HubClient({ me, initialParticipants, initialSpritzes, in
           onFailed={onInsertFailed}
         />
       ) : (
-        <p className="text-center text-sm italic text-[var(--color-ink-muted)]">
-          Got your personal link? Open it to spritz.
-        </p>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <p className="text-sm italic text-[var(--color-ink-muted)]">
+            Got your personal link? Open it to spritz.
+          </p>
+          <a
+            href="/register"
+            className="ui-label inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-aperol)] px-6 text-[15px] font-semibold text-[var(--color-cream)] shadow-sm transition active:scale-[0.97]"
+          >
+            Or join the trip →
+          </a>
+        </div>
       )}
 
       <LiveFeed feed={feed} participantsById={participantsById} />

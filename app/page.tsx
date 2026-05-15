@@ -1,5 +1,6 @@
 import { createSupabaseReadClient } from "@/lib/supabase/server";
 import { getCurrentParticipant } from "@/lib/participant";
+import { spritzWindowStatus } from "@/lib/time";
 import HubClient from "@/components/HubClient";
 import type { Participant, Spritz } from "@/lib/types";
 
@@ -37,6 +38,7 @@ export default async function HomePage() {
       initialParticipants={participants ?? []}
       initialSpritzes={allSpritzes ?? []}
       initialFeed={feed ?? []}
+      windowStatus={spritzWindowStatus()}
     />
   );
 }

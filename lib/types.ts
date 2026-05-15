@@ -2,6 +2,7 @@ export type Participant = {
   id: string;
   token: string;
   display_name: string;
+  email: string | null;
   emoji: string;
   color: string;
   joined_at: string;
