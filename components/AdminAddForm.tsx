@@ -20,6 +20,19 @@ export default function AdminAddForm({ action }: Props) {
         />
       </label>
 
+      <label className="flex flex-col gap-2">
+        <span className="ui-label text-[11px] text-[var(--color-ink-muted)]">
+          Email <span className="lowercase tracking-normal text-[var(--color-ink-faint)]">(optional)</span>
+        </span>
+        <input
+          type="email"
+          name="email"
+          autoComplete="email"
+          placeholder="dan@example.com"
+          className="rounded-[var(--radius-md)] border border-[var(--color-ink-faint)] bg-[var(--color-cream)] px-4 py-3 font-sans text-base text-[var(--color-ink)] focus:border-[var(--color-aperol)] focus:outline-none"
+        />
+      </label>
+
       <ParticipantStyleFields />
 
       <button

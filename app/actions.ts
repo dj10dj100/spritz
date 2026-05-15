@@ -134,6 +134,12 @@ export async function addParticipant(formData: FormData) {
   const displayName = String(formData.get("display_name") ?? "").trim().slice(0, 32);
   if (!displayName) redirect("/admin?error=name");
 
+  const rawEmail = String(formData.get("email") ?? "").trim().toLowerCase().slice(0, 254);
+  const email = rawEmail || null;
+  if (email && !EMAIL_RE.test(email)) {
+    redirect("/admin?error=" + encodeURIComponent("Email doesn't look right."));
+  }
+
   const emoji = safeEmoji(String(formData.get("emoji") ?? ""));
   const color = safeColor(String(formData.get("color") ?? ""));
   const token = generateToken();
@@ -141,9 +147,12 @@ export async function addParticipant(formData: FormData) {
   const supabase = createSupabaseAdminClient();
   const { error } = await supabase
     .from("participants")
-    .insert({ token, display_name: displayName, emoji, color });
+    .insert({ token, display_name: displayName, email, emoji, color });
 
-  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  if (error) {
+    const msg = /unique/i.test(error.message) ? "Email already registered." : error.message;
+    redirect(`/admin?error=${encodeURIComponent(msg)}`);
+  }
 
   revalidatePath("/admin");
   revalidatePath("/");

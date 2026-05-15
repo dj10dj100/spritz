@@ -8,9 +8,14 @@ export const dynamic = "force-dynamic";
 export default async function RegisterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string; error?: string; returning?: string }>;
+  searchParams: Promise<{
+    token?: string;
+    error?: string;
+    returning?: string;
+    recover?: string;
+  }>;
 }) {
-  const { token, error, returning } = await searchParams;
+  const { token, error, returning, recover } = await searchParams;
 
   if (token) {
     return (
@@ -48,9 +53,13 @@ export default async function RegisterPage({
     <main className="flex flex-1 flex-col items-center justify-center gap-8 py-12">
       <header className="flex flex-col items-center gap-2 text-center">
         <p className="ui-label text-[11px] text-[var(--color-ink-muted)]">aperitivo hour</p>
-        <h1 className="display text-[44px] text-[var(--color-aperol)]">Join the trip.</h1>
+        <h1 className="display text-[44px] text-[var(--color-aperol)]">
+          {recover ? "Recover your link." : "Join the trip."}
+        </h1>
         <p className="max-w-[360px] text-sm text-[var(--color-ink-muted)]">
-          Pick a name, drop your email. We&rsquo;ll show you a personal link to bookmark.
+          {recover
+            ? "Already registered? Enter your email below — we'll show your existing link."
+            : "Pick a name, drop your email. We'll show you a personal link to bookmark. Already registered? Same form — re-enter your email."}
         </p>
       </header>
 

@@ -169,16 +169,24 @@ export default function HubClient({
           onFailed={onInsertFailed}
         />
       ) : (
-        <div className="flex flex-col items-center gap-2 text-center">
+        <div className="flex flex-col items-center gap-3 text-center">
           <p className="text-sm italic text-[var(--color-ink-muted)]">
             Got your personal link? Open it to spritz.
           </p>
-          <a
-            href="/register"
-            className="ui-label inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-aperol)] px-6 text-[15px] font-semibold text-[var(--color-cream)] shadow-sm transition active:scale-[0.97]"
-          >
-            Or join the trip →
-          </a>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
+            <a
+              href="/register"
+              className="ui-label inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-aperol)] px-6 text-[15px] font-semibold text-[var(--color-cream)] shadow-sm transition active:scale-[0.97]"
+            >
+              Join the trip →
+            </a>
+            <a
+              href="/register?recover=1"
+              className="ui-label inline-flex h-12 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-ink-faint)] bg-[var(--color-cream-warm)] px-6 text-[13px] font-semibold text-[var(--color-ink)] transition active:scale-[0.97]"
+            >
+              Lost your link?
+            </a>
+          </div>
         </div>
       )}
 
