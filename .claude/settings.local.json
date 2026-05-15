@@ -10,7 +10,8 @@
       "Bash(curl -s -o /tmp/spritz-home.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3001/)",
       "Bash(awk 'NR==146 {for\\(i=1;i<=length\\($0\\);i++\\) printf\\(\"%d:%c \", i, substr\\($0,i,1\\)\\); print \"\"}' /Users/daniel.jenkins/sites/spritzulator/components/HubClient.tsx)",
       "Bash(pkill -f \"next-server\")",
-      "Bash(pkill -f \"next dev\")"
+      "Bash(pkill -f \"next dev\")",
+      "Bash(awk -F= '/^[A-Z]/ {print $1 \" \\(len=\" length\\($0\\)-length\\($1\\)-1 \"\\)\"}' .env.local)"
     ]
   }
 }

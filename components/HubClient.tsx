@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Participant, Spritz } from "@/lib/types";
-import { TRIP_NAME } from "@/lib/trip-config";
 import BigSpritzButton from "./BigSpritzButton";
 import Leaderboard from "./Leaderboard";
 import LiveFeed from "./LiveFeed";
@@ -138,8 +137,11 @@ export default function HubClient({ me, initialParticipants, initialSpritzes, in
     <main className="flex flex-1 flex-col gap-8 pb-12 pt-2">
       <header className="flex flex-col items-center gap-1 text-center">
         <p className="ui-label text-[11px] text-[var(--color-ink-muted)]">aperitivo hour</p>
-        <h1 className="display text-[64px] leading-none text-[var(--color-aperol)] [font-weight:800] sm:text-[88px]">
-          {TRIP_NAME}
+        <h1 className="display flex flex-col items-center leading-none text-[var(--color-aperol)]">
+          <span className="text-[48px] [font-weight:800] sm:text-[72px]">Finale Ligure</span>
+          <span className="text-[28px] italic text-[var(--color-ink-muted)] [font-weight:400] sm:text-[36px]">
+            2026
+          </span>
         </h1>
       </header>
 
