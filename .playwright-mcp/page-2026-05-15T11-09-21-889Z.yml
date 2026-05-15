@@ -1,0 +1,19 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - link "Hub" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - link "Stats" [ref=e6] [cursor=pointer]:
+          - /url: /stats
+      - button "Mute clink sound" [pressed] [ref=e7]:
+        - generic [ref=e8]: 🔔
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - paragraph [ref=e11]: aperitivo hour
+        - heading "ITALY 2026" [level=1] [ref=e12]
+        - paragraph [ref=e13]: A leaderboard for friends drinking too many Aperol spritzes.
+      - button "Sign in with Google" [ref=e15]:
+        - img [ref=e16]
+        - text: Sign in with Google
+  - alert [ref=e21]

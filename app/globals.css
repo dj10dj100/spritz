@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  --color-aperol: #FF6B1A;
+  --color-aperol-deep: #E04E00;
+  --color-cream: #FBF1E4;
+  --color-cream-warm: #F3E4CC;
+  --color-bottle: #1F4A2E;
+  --color-bottle-deep: #102818;
+  --color-ice: #9CC9D8;
+  --color-ink: #1A1410;
+  --color-ink-muted: #6E5F50;
+  --color-ink-faint: #B8A899;
+
+  --color-success: #3E7C47;
+  --color-warning: #D69500;
+  --color-error: #C13A2E;
+  --color-info: #5A9BAE;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
+
+  --text-2xs: 11px;
+  --text-xs: 13px;
+  --text-sm: 15px;
+  --text-base: 17px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 44px;
+  --text-4xl: 64px;
+  --text-5xl: 96px;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html, body {
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
+  }
+
+  body {
+    min-height: 100dvh;
+    background:
+      linear-gradient(135deg, var(--color-cream) 0%, var(--color-cream-warm) 100%);
+    background-size: 200% 200%;
+    animation: gradient-drift 18s ease-in-out infinite;
+  }
+
+  h1, h2, h3, .display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+
+  .ui-label {
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Inputs: ensure ≥16px so iOS does not zoom on focus. */
+  input, select, textarea {
+    font-size: 17px;
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+@keyframes gradient-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+@keyframes shake-horizontal {
+  0%, 100%        { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80%      { transform: translateX(4px); }
+}
+
+.shake {
+  animation: shake-horizontal 0.4s ease-in-out;
+}
+
+@keyframes float-crown {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+.float-crown {
+  animation: float-crown 2s ease-in-out infinite;
+}
+
+@keyframes leader-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-aperol) 0%, transparent); }
+  40%  { box-shadow: 0 0 32px 6px color-mix(in oklab, var(--color-aperol) 35%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-aperol) 0%, transparent); }
+}
+
+.leader-pulse {
+  animation: leader-pulse 600ms ease-out;
+}
+
+/* Paper-grain texture overlay. Fixed position, low-opacity SVG noise. */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.06;
+  background-image: url("/grain.svg");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+  }
+  body {
+    animation: none;
+    background: var(--color-cream);
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "spritzulator",
+  "short_name": "spritz",
+  "description": "A leaderboard for friends drinking too many Aperol spritzes.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FBF1E4",
+  "theme_color": "#FF6B1A",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
