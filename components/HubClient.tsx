@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Participant, Spritz } from "@/lib/types";
 import { TRIP_NAME } from "@/lib/trip-config";
 import BigSpritzButton from "./BigSpritzButton";
@@ -28,7 +28,7 @@ export default function HubClient({ me, initialParticipants, initialSpritzes, in
   const [feed, setFeed] = useState<Spritz[]>(initialFeed);
   const [pendingUndo, setPendingUndo] = useState<PendingUndo | null>(null);
 
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const participantsById = useMemo(() => {
     const m = new Map<string, Participant>();
     for (const p of participants) m.set(p.id, p);

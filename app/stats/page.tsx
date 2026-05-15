@@ -1,16 +1,27 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseReadClient } from "@/lib/supabase/server";
+import { getCurrentParticipant } from "@/lib/participant";
 import type { Participant, Spritz } from "@/lib/types";
 import { dryStreak, spritzOfTheDay, spritzesPerHour, totalGroup } from "@/lib/stats";
 
 export const dynamic = "force-dynamic";
 
 export default async function StatsPage() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/");
+  const me = await getCurrentParticipant();
+  if (!me) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center gap-6 py-16 text-center">
+        <p className="display text-2xl italic text-[var(--color-ink-muted)]">
+          Open your personal link first.
+        </p>
+        <Link href="/" className="ui-label text-[11px] text-[var(--color-ink-muted)] underline">
+          ← Hub
+        </Link>
+      </main>
+    );
+  }
 
+  const supabase = createSupabaseReadClient();
   const [{ data: participants }, { data: spritzes }] = await Promise.all([
     supabase
       .from("participants")

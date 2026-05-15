@@ -7,29 +7,45 @@ See `PRODUCT.md`, `DESIGN.md`, and the plan in `nimbalyst-local/plans/`.
 
 ## Stack
 
-Next.js 15 (App Router, Server Actions) · React 19 · TypeScript · Tailwind 4 ·
-framer-motion · canvas-confetti · Supabase (Auth + Postgres + Realtime).
+Next.js 15 (App Router, Server Actions, Middleware) · React 19 · TypeScript ·
+Tailwind 4 · framer-motion · canvas-confetti · Supabase (Postgres + Realtime).
+
+No Supabase Auth. Each participant gets a unique invite URL — `/?u=TOKEN`
+sets a long-lived cookie that identifies them. Friends-aren't-your-threat-model.
 
 ## Setup
 
 1. **Supabase project**
    - Create a new project at <https://supabase.com>.
    - SQL editor → run `supabase/migrations/0001_init.sql`.
-   - Authentication → Providers → enable **Google** (open sign-in, no allowlist).
-     Add `http://localhost:3000/auth/callback` and your production callback URL
-     to "Redirect URLs".
+   - Project Settings → API → copy the `URL`, `anon` key, and `service_role` key.
 
-2. **Environment**
-   ```bash
-   cp .env.local.example .env.local
-   # fill NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_SITE_URL
-   ```
+2. **Environment** — copy `.env.local.example` to `.env.local` and fill in:
+   - `NEXT_PUBLIC_SUPABASE_URL` — project URL.
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — anon key (browser + server reads).
+   - `NEXT_PUBLIC_SITE_URL` — e.g. `http://localhost:3000` or your Vercel URL.
+   - `SUPABASE_SERVICE_ROLE_KEY` — service role key (server-only, used by Server
+     Actions to bypass RLS for writes). **Never** expose this client-side.
+   - `ADMIN_PASSWORD` — shared password for the `/admin` page.
 
 3. **Run**
    ```bash
    npm install
    npm run dev
    ```
+
+4. **Add your friends**
+   - Visit `/admin`, enter `ADMIN_PASSWORD`.
+   - Add each person (name + emoji + color). Copy their personal URL.
+   - DM each one their URL via WhatsApp. The first tap on that URL bakes the
+     cookie; from then on they just open the app.
+
+## Routes
+
+- `/` — Hub: leaderboard + big +1 button + live feed (invite-only landing if no cookie).
+- `/admin` — Add/remove participants and copy share URLs (password-gated).
+- `/stats` — Group total, per-hour, spritz of the day, dry streaks.
+- `/loser` — Last-place participant + tagline.
 
 ## Scripts
 
@@ -39,15 +55,6 @@ framer-motion · canvas-confetti · Supabase (Auth + Postgres + Realtime).
 | `npm run build` | Production build |
 | `npm run start` | Run built app |
 | `npm run typecheck` | TS check |
-
-## Routes
-
-- `/` — Hub: leaderboard + big +1 button + live feed (sign-in if no session).
-- `/onboard` — First-time emoji + color picker.
-- `/stats` — Group total, per-hour, spritz of the day, dry streaks.
-- `/loser` — Last-place participant + tagline.
-- `/auth/callback` — Supabase OAuth handshake.
-- `/auth/error` — Recoverable OAuth error page.
 
 ## Trip config
 

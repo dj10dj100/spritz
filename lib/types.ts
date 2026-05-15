@@ -1,6 +1,6 @@
 export type Participant = {
   id: string;
-  auth_user_id: string;
+  token: string;
   display_name: string;
   emoji: string;
   color: string;
